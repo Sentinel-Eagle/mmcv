@@ -243,9 +243,10 @@ class MultiScaleDeformableAttention(BaseModule):
             embed_dims, num_heads * num_levels * num_points * 2)
         self.attention_weights = nn.Linear(embed_dims,
                                            num_heads * num_levels * num_points)
-        value_proj_size = int(embed_dims * value_proj_ratio)
-        self.value_proj = nn.Linear(embed_dims, value_proj_size)
-        self.output_proj = nn.Linear(value_proj_size, embed_dims)
+        # value_proj_size = int(embed_dims * value_proj_ratio)
+        # self.value_proj = nn.Linear(embed_dims, value_proj_size)
+        # self.output_proj = nn.Linear(value_proj_size, embed_dims)
+        self.output_proj = nn.Linear(embed_dims, embed_dims)
         self.init_weights()
 
     def init_weights(self) -> None:
@@ -265,7 +266,7 @@ class MultiScaleDeformableAttention(BaseModule):
 
         self.sampling_offsets.bias.data = grid_init.view(-1)
         constant_init(self.attention_weights, val=0., bias=0.)
-        xavier_init(self.value_proj, distribution='uniform', bias=0.)
+        # xavier_init(self.value_proj, distribution='uniform', bias=0.)
         xavier_init(self.output_proj, distribution='uniform', bias=0.)
         self._is_init = True
 
@@ -334,7 +335,7 @@ class MultiScaleDeformableAttention(BaseModule):
         bs, num_value, _ = value.shape
         assert (spatial_shapes[:, 0] * spatial_shapes[:, 1]).sum() == num_value
 
-        value = self.value_proj(value)
+        # value = self.value_proj(value)
         if key_padding_mask is not None:
             value = value.masked_fill(key_padding_mask[..., None], 0.0)
         value = value.view(bs, num_value, self.num_heads, -1)
